@@ -1,0 +1,17 @@
+# PyInstaller build artifacts
+build/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+
+# Runtime data
+src/__pycache__/
+uploads/
+outputs/

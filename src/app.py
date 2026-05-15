@@ -112,12 +112,25 @@ async function convert(){
     const res=await fetch('/convert',{method:'POST',body:form});
     if(!res.ok){const e=await res.json();throw new Error(e.detail||'Conversion failed')}
     const blob=await res.blob();
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
     const cd=res.headers.get('content-disposition')||'';
-    a.download=cd.match(/filename="([^"]+)"/)?.[1]||'HM_CVs.zip';
-    a.click();
+    const filename=cd.match(/filename="([^"]+)"/)?.[1]||'HM_CVs.zip';
+    if(window.showSaveFilePicker){
+      const ext=filename.split('.').pop();
+      const types=ext==='zip'
+        ?[{description:'ZIP Archive',accept:{'application/zip':['.zip']}}]
+        :[{description:'Word Document',accept:{'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx']}}];
+      try{
+        const fh=await window.showSaveFilePicker({suggestedName:filename,types});
+        const w=await fh.createWritable();
+        await w.write(blob);
+        await w.close();
+      }catch(e){if(e.name!=='AbortError')throw e;}
+    }else{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=filename; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),10000);
+    }
     st.className='ok'; st.textContent='✓ Download ready!';
   }catch(e){st.className='err';st.textContent='✗ '+e.message;}
   finally{btn.disabled=false}
