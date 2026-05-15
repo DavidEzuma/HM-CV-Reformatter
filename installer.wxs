@@ -1,0 +1,81 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Package Name="HM CV Reformatter"
+             Manufacturer="David Ezuma"
+             Version="1.0.0"
+             UpgradeCode="53ADC740-00B6-4E82-BC4C-DEE50727C38C"
+             Scope="perUser">
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+        <Property Id="MSIINSTALLPERUSER" Value="1" />
+
+        <MediaTemplate EmbedCab="yes" />
+
+        <StandardDirectory Id="LocalAppDataFolder">
+            <Directory Id="INSTALLFOLDER" Name="HMCVReformatter" />
+        </StandardDirectory>
+
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Directory Id="ApplicationProgramsFolder" Name="HM CV Reformatter">
+                <Component Id="StartMenuShortcut" Guid="82A03CBC-4359-4564-89E4-2438056E6FAA">
+                    <Shortcut Id="StartMenuShortcutLink"
+                              Name="HM CV Reformatter"
+                              Description="Launch HM CV Reformatter"
+                              Target="[INSTALLFOLDER]HMCVReformatter.exe"
+                              WorkingDirectory="INSTALLFOLDER" />
+                    <RegistryValue Root="HKCU"
+                                   Key="Software\DavidEzuma\HMCVReformatter"
+                                   Name="installed"
+                                   Type="integer"
+                                   Value="1"
+                                   KeyPath="yes" />
+                    <RemoveFolder Id="RemoveApplicationProgramsFolder"
+                                  Directory="ApplicationProgramsFolder"
+                                  On="uninstall" />
+                </Component>
+            </Directory>
+        </StandardDirectory>
+
+        <StandardDirectory Id="DesktopFolder">
+            <Component Id="DesktopShortcut" Guid="711CA7EE-D42B-4619-9629-852EC15183D3">
+                <Shortcut Id="DesktopShortcutLink"
+                          Name="HM CV Reformatter"
+                          Description="Launch HM CV Reformatter"
+                          Target="[INSTALLFOLDER]HMCVReformatter.exe"
+                          WorkingDirectory="INSTALLFOLDER" />
+                <RegistryValue Root="HKCU"
+                               Key="Software\DavidEzuma\HMCVReformatter"
+                               Name="desktopShortcut"
+                               Type="integer"
+                               Value="1"
+                               KeyPath="yes" />
+            </Component>
+        </StandardDirectory>
+
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <Component Id="MainExecutable" Guid="EEA2F63F-1DB6-4255-946E-FDC074B7AF46">
+                <File Id="HMCVReformatterExe"
+                      Name="HMCVReformatter.exe"
+                      Source="dist\HMCVReformatter.exe"
+                      KeyPath="yes" />
+            </Component>
+        </ComponentGroup>
+
+        <Feature Id="MainFeature" Title="HM CV Reformatter" Level="1">
+            <ComponentGroupRef Id="ProductComponents" />
+            <ComponentRef Id="StartMenuShortcut" />
+            <ComponentRef Id="DesktopShortcut" />
+        </Feature>
+
+        <CustomAction Id="LaunchApplication"
+                      FileRef="HMCVReformatterExe"
+                      ExeCommand=""
+                      Execute="immediate"
+                      Return="asyncNoWait" />
+
+        <InstallExecuteSequence>
+            <Custom Action="LaunchApplication" After="InstallFinalize" Condition="NOT Installed AND NOT REMOVE" />
+        </InstallExecuteSequence>
+
+    </Package>
+</Wix>
